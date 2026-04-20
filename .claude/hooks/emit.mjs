@@ -104,7 +104,7 @@ function resolveAgent(payload) {
 function summarizeToolInput(input) {
   if (!input || typeof input !== "object") return null;
   // Small, bounded preview for the dashboard
-  const keys = ["file_path", "command", "pattern", "path", "url", "description"];
+  const keys = ["file_path", "command", "pattern", "path", "url", "description", "subagent_type"];
   const out = {};
   for (const k of keys) if (input[k] != null) out[k] = String(input[k]).slice(0, 120);
   return Object.keys(out).length ? out : null;

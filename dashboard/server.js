@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// Dashboard server for claude-multi-agent-dev.
+// Dashboard server for claude-multi-agent-dev (AV branch).
 //
 // - Serves static files from ./public on DASHBOARD_PORT (default 3456)
 // - Accepts POST /event from Claude Code hooks and broadcasts to WebSocket clients
@@ -14,7 +14,7 @@ const fs = require("node:fs");
 const path = require("node:path");
 const { WebSocketServer } = require("ws");
 
-// ---------- .env loader (for GitHub credentials) ----------
+// ---------- .env loader ----------
 function loadEnvFile() {
   const envPath = path.resolve(__dirname, "..", ".env");
   if (!fs.existsSync(envPath)) return {};
@@ -36,10 +36,6 @@ const ENV = { ...envFile, ...process.env };
 const PORT = Number(ENV.DASHBOARD_PORT || 3456);
 const PUBLIC_DIR = path.resolve(__dirname, "public");
 const MAX_LOG = 200;
-const GITHUB_TOKEN = ENV.GITHUB_TOKEN || "";
-const GITHUB_OWNER = ENV.GITHUB_OWNER || "";
-const GITHUB_REPO = ENV.GITHUB_REPO || "";
-const GITHUB_POLL_MS = Math.max(5000, Number(ENV.GITHUB_POLL_MS) || 10000);
 
 const MIME = {
   ".html": "text/html; charset=utf-8",
@@ -130,145 +126,10 @@ function nowStamp() {
 }
 
 function logEvent(ev) {
-  const a = (ev.agent || "?").padEnd(18);
+  const a = (ev.agent || "?").padEnd(20);
   const t = (ev.type || "?").padEnd(14);
   const detail = ev.tool || (ev.data && ev.data.summary) || "";
   console.log(`  [${nowStamp()}] ${a} ${t} ${detail}`);
-}
-
-// ---------- GitHub ticket polling ----------
-// Reads GITHUB_TOKEN/OWNER/REPO from .env and polls /repos/:o/:r/issues every
-// GITHUB_POLL_MS (default 10s). Issue state is derived from labels the
-// orchestration workflow writes (status:todo|in-progress|review|qa-testing);
-// closed issues map to "done". Pull-requests are filtered out — the dashboard
-// tracks tickets, not PRs. Broadcasts `{ type: "__tickets__", tickets: [...] }`
-// on every successful poll and serves GET /tickets for the initial snapshot.
-let tickets = [];
-let ticketsFetchedAt = null;
-let githubBackoffUntil = 0;
-let githubPollTimer = null;
-let githubLoggedFirstSuccess = false;
-
-function ticketStateFromIssue(issue) {
-  if (issue.state === "closed") return "done";
-  const labels = (issue.labels || []).map((l) =>
-    (typeof l === "string" ? l : l && l.name ? l.name : "").toLowerCase(),
-  );
-  if (labels.includes("status:qa-testing")) return "qa-testing";
-  if (labels.includes("status:review")) return "review";
-  if (labels.includes("status:in-progress")) return "in-progress";
-  if (labels.includes("status:todo")) return "todo";
-  return "todo";
-}
-
-function shapeTicket(issue) {
-  return {
-    number: issue.number,
-    title: issue.title || "",
-    state: ticketStateFromIssue(issue),
-    url: issue.html_url || "",
-    updated_at: issue.updated_at || null,
-    labels: (issue.labels || [])
-      .map((l) => (typeof l === "string" ? l : l && l.name ? l.name : ""))
-      .filter(Boolean),
-  };
-}
-
-async function fetchGitHubTickets() {
-  if (!GITHUB_TOKEN || !GITHUB_OWNER || !GITHUB_REPO) return null;
-  const now = Date.now();
-  if (now < githubBackoffUntil) return null;
-
-  const all = [];
-  let page = 1;
-  const perPage = 100;
-
-  while (page <= 5) {
-    const url =
-      `https://api.github.com/repos/${encodeURIComponent(GITHUB_OWNER)}/` +
-      `${encodeURIComponent(GITHUB_REPO)}/issues` +
-      `?state=all&per_page=${perPage}&page=${page}`;
-    const res = await fetch(url, {
-      headers: {
-        authorization: `Bearer ${GITHUB_TOKEN}`,
-        accept: "application/vnd.github+json",
-        "x-github-api-version": "2022-11-28",
-        "user-agent": "cmad-dashboard",
-      },
-      signal: AbortSignal.timeout(8000),
-    });
-
-    if (res.status === 401 || res.status === 403 || res.status === 429) {
-      const resetHeader = res.headers.get("x-ratelimit-reset");
-      const resetMs = resetHeader ? Number(resetHeader) * 1000 : 0;
-      const until = resetMs > Date.now() ? resetMs : Date.now() + 60_000;
-      githubBackoffUntil = until;
-      const secs = Math.round((until - Date.now()) / 1000);
-      console.warn(`  github: ${res.status} — backing off ${secs}s`);
-      return null;
-    }
-    if (!res.ok) {
-      console.warn(`  github: HTTP ${res.status} — will retry next interval`);
-      return null;
-    }
-
-    const body = await res.json();
-    if (!Array.isArray(body)) break;
-    for (const issue of body) {
-      if (issue.pull_request) continue;
-      all.push(shapeTicket(issue));
-    }
-    if (body.length < perPage) break;
-    page += 1;
-  }
-
-  return all;
-}
-
-function ticketsChanged(a, b) {
-  if (a.length !== b.length) return true;
-  const key = (t) => `${t.number}|${t.state}|${t.title}|${t.updated_at}`;
-  const aSet = new Set(a.map(key));
-  for (const t of b) if (!aSet.has(key(t))) return true;
-  return false;
-}
-
-async function pollGithubOnce() {
-  try {
-    const next = await fetchGitHubTickets();
-    if (!next) return;
-    if (!githubLoggedFirstSuccess) {
-      console.log(`  github: first fetch OK (${next.length} tickets from ${GITHUB_OWNER}/${GITHUB_REPO})`);
-      githubLoggedFirstSuccess = true;
-    }
-    if (ticketsChanged(tickets, next)) {
-      tickets = next;
-      ticketsFetchedAt = new Date().toISOString();
-      broadcast({
-        type: "__tickets__",
-        tickets,
-        timestamp: ticketsFetchedAt,
-      });
-    }
-  } catch (err) {
-    console.warn(`  github: poll error — ${err.message}`);
-  }
-}
-
-function startGithubPolling() {
-  if (!GITHUB_TOKEN) {
-    console.log("  github: no GITHUB_TOKEN in .env — ticket polling disabled");
-    return;
-  }
-  if (!GITHUB_OWNER || !GITHUB_REPO) {
-    console.log("  github: GITHUB_OWNER / GITHUB_REPO missing — ticket polling disabled");
-    return;
-  }
-  console.log(`  github: polling ${GITHUB_OWNER}/${GITHUB_REPO} every ${GITHUB_POLL_MS}ms`);
-  // First poll after a short delay so server is fully up
-  setTimeout(pollGithubOnce, 1000);
-  githubPollTimer = setInterval(pollGithubOnce, GITHUB_POLL_MS);
-  githubPollTimer.unref?.();
 }
 
 // ---------- HTTP server ----------
@@ -296,11 +157,6 @@ const server = http.createServer(async (req, res) => {
 
     if (path_ === "/events" && req.method === "GET") {
       writeJSON(res, 200, eventLog);
-      return;
-    }
-
-    if (path_ === "/tickets" && req.method === "GET") {
-      writeJSON(res, 200, { tickets, fetched_at: ticketsFetchedAt });
       return;
     }
 
@@ -346,7 +202,7 @@ const server = http.createServer(async (req, res) => {
 const wss = new WebSocketServer({ server });
 
 wss.on("connection", (ws) => {
-  // Replay recent events + current tickets to the new client
+  // Replay recent events to the new client
   try {
     ws.send(
       JSON.stringify({
@@ -355,27 +211,16 @@ wss.on("connection", (ws) => {
         timestamp: new Date().toISOString(),
       }),
     );
-    if (tickets.length) {
-      ws.send(
-        JSON.stringify({
-          type: "__tickets__",
-          tickets,
-          timestamp: ticketsFetchedAt || new Date().toISOString(),
-        }),
-      );
-    }
   } catch {}
 });
 
 // ---------- boot ----------
 server.listen(PORT, () => {
-  console.log(`\n  🟢 claude-multi-agent-dev · orchestration dashboard`);
+  console.log(`\n  🟢 claude-multi-agent-dev · AV orchestration dashboard`);
   console.log(`     http://localhost:${PORT}`);
   console.log(`     POST /event   (hook sink)`);
   console.log(`     GET  /events  (recent log)`);
-  console.log(`     GET  /tickets (github snapshot)`);
   console.log(`     WS   ws://localhost:${PORT}`);
-  startGithubPolling();
   console.log(`     (Ctrl+C to stop)\n`);
 });
 

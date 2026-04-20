@@ -1,6 +1,13 @@
 #!/usr/bin/env bash
 # claude-multi-agent-dev · install into an existing project
 #
+# NOTE (av-dev branch): this installer was written for the web-dev variant
+# of the template (frontend/backend/uiux/qa agents, GitHub-centric flow).
+# It has NOT been updated or tested for the AV branch. Running it against
+# an AV target will pull in stale references to frontend-engineer /
+# backend-engineer / GITHUB_* env vars. Use with caution, or rewrite for AV
+# before running.
+#
 # Installs the orchestration layer (agents, hooks, dashboard, scripts) into
 # an existing repo without clobbering what's already there.
 #

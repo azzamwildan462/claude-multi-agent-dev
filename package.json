@@ -2,7 +2,7 @@
   "name": "claude-multi-agent-dev",
   "version": "0.1.0",
   "private": true,
-  "description": "A template repo that turns Claude Code into a multi-agent software development team — Lead, Frontend, Backend, UI/UX, and QA — with a live orchestration dashboard.",
+  "description": "Claude Code multi-agent workspace for Autonomous Vehicle development based on Autoware — Lead plus 10 specialist agents (hardware, sensing, localization, mapping, perception, planning, control, system-evaluator, tuning, researcher) with a live orchestration dashboard.",
   "scripts": {
     "setup": "bash scripts/setup.sh",
     "dashboard": "bash scripts/start-dashboard.sh",
@@ -11,10 +11,10 @@
   "keywords": [
     "claude-code",
     "multi-agent",
-    "template",
     "orchestration",
-    "github",
-    "playwright"
+    "autonomous-vehicle",
+    "autoware",
+    "ros2"
   ],
   "license": "MIT",
   "engines": {
