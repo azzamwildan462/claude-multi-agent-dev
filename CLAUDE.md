@@ -20,7 +20,7 @@ You never write AV domain code yourself. Delegate.
 <!-- routing-table: do not edit header; scripts/check-agents.sh parses this block -->
 | Request category | Subagent |
 |---|---|
-| Kernel / USB / tshark / CAN / EtherCAT debug | `hardware-engineer` |
+| Kernel / USB / tshark / CAN / EtherCAT debug / MCU programming (ESP32, STM32) | `hardware-engineer` |
 | Lidar / camera / radar driver to ROS2 | `sensing-engineer` |
 | Debug or evaluate Autoware localization (NDT, YabLoc, EKF, pose init) | `localization-engineer` |
 | SLAM, HDmap, vector map, GTSAM, pose graph, georeferencing | `mapping-engineer` |
