@@ -1,16 +1,17 @@
 ---
 name: comms-debug
-description: Debug communication channels — Ethernet via tshark, USB-serial via usbmon+tshark, and UART via minicom/tio/screen. Use when user says "tshark", "wireshark", "sniff packet", "packet capture", "usbmon", "serial debug", "uart debug", "minicom", "tio", "sniff ethernet", or asks to inspect bytes on any wire.
+description: Debug communication channels — Ethernet via tshark, ECAN/CAN-over-Ethernet gateways, USB-serial via usbmon+tshark, and UART via minicom/tio/screen. Use when user says "tshark", "wireshark", "sniff packet", "packet capture", "ecan", "can over ethernet", "can gateway", "usbmon", "serial debug", "uart debug", "minicom", "tio", "sniff ethernet", or asks to inspect bytes on any wire.
 allowed-tools: Bash(tshark *), Bash(tcpdump *), Bash(sudo *), Bash(modprobe *), Bash(ip *), Bash(lsusb *), Bash(minicom *), Bash(tio *), Bash(screen *), Bash(stty *), Bash(ls *), Bash(cat *), Bash(command *)
 ---
 
 # Comms Debug — tshark, usbmon, UART
 
-Unified guide for three transports:
+Unified guide for four transport scenarios:
 
 | Channel | Tool |
 |---|---|
 | Ethernet (UDP/TCP/IP) | `tshark` (Wireshark CLI) |
+| ECAN / CAN-over-Ethernet (gateway) | `tshark` on the gateway's Ethernet flow; decode vendor frame format |
 | USB-serial (CDC / FTDI / CP210x) | `usbmon` kernel module + `tshark -i usbmonN` |
 | UART direct (`/dev/ttyUSB*`, `/dev/ttyACM*`) | `minicom`, `tio`, or `screen` |
 
@@ -84,6 +85,80 @@ tshark -r /tmp/cap.pcap -Y 'udp.dstport==2368' \
 ```
 
 Use `-Y` (display filter, Wireshark syntax) on the read side. `-f` does not work on `-r`.
+
+---
+
+## 1b. ECAN / CAN-over-Ethernet gateway
+
+An ECAN gateway carries CAN frames over UDP (sometimes TCP) between the host and the gateway IP. Examples: Advantech ECU, Peak CAN-Ethernet, Kvaser BlackBird, plus many OEM / in-house gateways. The wire format is **vendor-specific** — don't assume a standard. Your first job is to confirm traffic exists and capture enough to either decode with the vendor spec or hand the pcap to the driver author.
+
+### Identify the gateway
+
+Ask the user for:
+- Gateway IP (e.g. `192.168.1.100`)
+- UDP/TCP port(s) — often 19228, 1001, 9200, or vendor-default (check the datasheet)
+- Transport (UDP is typical; TCP for some configuration channels)
+- Expected CAN bitrate and frame rate (so you know whether "no packets" means silence or dropped)
+
+If the user doesn't know the port, do a broad capture first:
+
+```bash
+sudo tshark -i <eth-iface> -f "host <gateway-ip>" -c 500 -w /tmp/ecan.pcap
+# Then inspect port distribution:
+tshark -r /tmp/ecan.pcap -q -z conv,udp
+tshark -r /tmp/ecan.pcap -q -z conv,tcp
+```
+
+### Targeted capture once port is known
+
+```bash
+sudo tshark -i <eth-iface> -f "host <gateway-ip> and udp port <p>" -c 1000 -w /tmp/ecan.pcap
+```
+
+### Quick sanity on raw CAN payloads inside UDP
+
+Most ECAN frame formats put the 11/29-bit CAN ID + DLC + data somewhere in the UDP payload. Dump payload hex to eyeball structure:
+
+```bash
+tshark -r /tmp/ecan.pcap -Y "udp.port==<p>" \
+  -T fields -e frame.time_relative -e ip.src -e udp.srcport -e data.data | head -20
+```
+
+Then match against the vendor spec. Common patterns:
+- 8-byte header (timestamp / flags) + CAN ID (4 bytes, big-endian) + DLC (1 byte) + payload (up to 8 bytes)
+- Multi-frame packing: several CAN messages concatenated in one UDP datagram — look for periodic length that's a multiple of `header+frame`
+
+### Bidirectional check
+
+ECAN debug usually needs both directions:
+
+```bash
+sudo tshark -i <eth-iface> -f "host <gateway-ip>" -c 500 \
+  -T fields -e frame.time_relative -e ip.src -e ip.dst -e udp.length | head
+```
+
+If you only see one direction, confirm ARP resolution and the gateway's own IP configuration.
+
+### Cross-check with CAN-side if available
+
+If the gateway also exposes a local SocketCAN interface (some do, via a Linux driver), you can correlate:
+
+```bash
+# One shell: tshark Ethernet
+sudo tshark -i <eth-iface> -f "host <gateway-ip>" -a duration:5 -w /tmp/ecan.pcap
+# Other shell: candump same 5 seconds
+candump -L can0 > /tmp/can.log &
+sleep 5 && kill %1
+```
+
+Frame IDs should line up 1:1.
+
+### ECAN pitfalls
+
+- **VLAN tagging**: some industrial ECAN gateways sit on a VLAN. If you see zero packets despite traffic existing, try capturing on the VLAN sub-interface (`eth0.100`) or add `-f "vlan"` to the filter.
+- **Broadcast / multicast**: gateways may broadcast (255.255.255.255) or multicast (224.x.x.x). `host <ip>` filter might miss them — use `ether host <mac>` or no host filter.
+- **Endianness**: CAN IDs inside UDP payload are often big-endian — don't assume little.
+- **TCP reordering**: if gateway uses TCP, tshark's default reassembly may combine packets. Add `-o tcp.desegment_tcp_streams:FALSE` when you want raw segments.
 
 ---
 
