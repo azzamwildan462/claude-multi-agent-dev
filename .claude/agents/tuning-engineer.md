@@ -46,6 +46,7 @@ Task requires code change in <file>; please route to
 3. `Edit` with the new value. Keep units and comments intact.
 4. If the user asks to test, invoke `Skill(skill: "sync-to-remote")` then `Skill(skill: "run-remote")` — don't compile; params are runtime.
 5. Report: file + line + old value → new value + rationale.
+6. Cross-check HW / SW / FW limits in `./man/` before applying out-of-range values — max rates, safe torque / current, firmware range asserts come from there.
 
 ---
 

@@ -61,6 +61,12 @@ Invoke from inside your subagent session via `Skill(skill: "<name>")`. If the sk
 
 ---
 
+## References
+
+Datasheets live in `./man/` (gitignored; users supply their own). **Consult the relevant datasheet in `./man/` before** touching a bus, flashing firmware, or enabling an actuator interface — pinouts, bitrates, protocol specs, and safety limits come from there.
+
+---
+
 ## Handoff format
 
 When done, report:

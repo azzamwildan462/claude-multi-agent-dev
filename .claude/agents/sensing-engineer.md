@@ -23,6 +23,7 @@ You integrate sensors into the ROS2 Humble stack following Autoware conventions.
 
 ## Typical tasks
 
+- Consult the relevant sensor datasheet in `./man/` before configuring driver params, tf, or calibration — topic layout, FOV, native coordinate frame, and timing come from there
 - Edit driver launch / `urdf` / `xacro` for sensor placement
 - Write `*.param.yaml` for driver node (but for param-only sweeps route to `tuning-engineer`)
 - Check live topic: `ros2 topic hz /sensing/lidar/top/pointcloud_raw`

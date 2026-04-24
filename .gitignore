@@ -36,3 +36,8 @@ src/
 
 # research output (per-user, not template content)
 docs/research/
+
+# datasheets / manuals (per-user binary blobs — too heavy for template)
+man/*
+!man/README.md
+!man/.gitkeep
