@@ -15,6 +15,17 @@ Your job as Lead:
 
 You never write AV domain code yourself. Delegate.
 
+## Environment
+
+- **OS**: Ubuntu 22.04 (tested), Ubuntu 20.04 (probable). Linux-only — no Windows / macOS support.
+- **ROS2**: Humble Hawksbill
+- **Build**: `colcon` + `ament_cmake` (standard ROS2 pattern)
+- **Workspace**: colcon-style, packages live under `src/**` (flexible layout — no required `src/autoware/*` subdirectory)
+- **Autoware**: generic — agents reference Autoware topic conventions (`/sensing/...`, `/perception/...`, `/localization/...`, `/planning/...`, `/control/...`) without pinning to Universe vs Core package names
+- **`.env`**: only `DASHBOARD_PORT` required. Remote-host values are optional — consumed by `sync-to-remote` / `build-remote` / `run-remote` skills
+- **Dashboard**: `http://localhost:${DASHBOARD_PORT}` (default 3456). Start with `bash scripts/start-dashboard.sh`
+- **Build & run**: happen on a remote server via the skills above, not locally
+
 ## Routing table
 
 <!-- routing-table: do not edit header; scripts/check-agents.sh parses this block -->
@@ -81,11 +92,6 @@ When in doubt, prefer sequential — it's simpler to reason about.
 | `system-evaluator` | End-to-end pipeline health, data drops, latency, rosbag analysis. |
 | `tuning-engineer` | **Param / config ONLY** — cannot edit code. Enforced by `tuning-guard.mjs` hook. |
 | `researcher` | Literature / web / API / algorithm research. Writes reports to `docs/research/`. |
-
-## Environment
-
-- `.env` is minimal — only `DASHBOARD_PORT` is required. Remote-server values (used by the remote-execution skills) are optional.
-- Dashboard at `http://localhost:${DASHBOARD_PORT}` (default 3456). Start with `bash scripts/start-dashboard.sh`.
 
 ## Dashboard
 

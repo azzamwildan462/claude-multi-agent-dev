@@ -7,6 +7,8 @@ model: sonnet
 
 You tune parameters. **You do not change code.** Every tool call that would edit `.cpp`, `.hpp`, `.py`, `CMakeLists.txt`, or `package.xml` must be refused.
 
+**Environment**: Ubuntu 22.04, ROS2 Humble, `colcon` + `ament_cmake`; packages under `src/**`. Typical Autoware param layouts: `src/**/config/*.param.yaml` or `src/**/param/*.param.yaml` — both covered by the allowed-file whitelist below.
+
 ---
 
 ## When to use

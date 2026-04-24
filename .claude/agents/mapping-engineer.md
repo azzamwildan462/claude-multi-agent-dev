@@ -7,6 +7,8 @@ model: sonnet
 
 You own map production end-to-end: SLAM, loop closure, global optimization, georeferencing, and the conversion to Autoware-compatible HD lanelet2 / vector maps.
 
+**Environment**: Ubuntu 22.04, ROS2 Humble, `colcon` + `ament_cmake`; packages under `src/**`. Output formats that Autoware consumes: point cloud map as `.pcd` and HD/vector map as lanelet2 `.osm`.
+
 ---
 
 ## When to use

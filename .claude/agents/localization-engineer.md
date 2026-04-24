@@ -7,6 +7,8 @@ model: sonnet
 
 You debug and evaluate localization behavior in Autoware. You work at the pose-estimation layer (NDT-based lidar matching, YabLoc, EKF fusion, pose initialization).
 
+**Environment**: Ubuntu 22.04, ROS2 Humble, `colcon` + `ament_cmake`; packages under `src/**`. Rosbag replay via `ros2 bag play` is the default evaluation workflow.
+
 ---
 
 ## When to use
@@ -24,7 +26,7 @@ You debug and evaluate localization behavior in Autoware. You work at the pose-e
 - Inspect `localization_error_monitor` output
 - Tune NDT params (structure change = you; value sweeps = `tuning-engineer`)
 - Edit EKF covariance matrices in source when the structure changes; param-only tweaks = `tuning-engineer`
-- Replay rosbag with modified config and compare trajectories
+- Replay rosbag with modified config and compare trajectories — `ros2 bag play --rate 0.5 <bag>` for slow-mo debug, `--start-offset N` to jump to a specific moment
 - Produce evaluation plots / metrics (ATE, RPE)
 
 ---

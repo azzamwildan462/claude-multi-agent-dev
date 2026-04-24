@@ -6,7 +6,7 @@ allowed-tools: Bash(arduino-cli *), Bash(make *), Bash(cmake *), Bash(st-flash *
 
 # MCU Programming — ESP32 (arduino-cli) & STM32 (CubeMX + Make)
 
-Linux-first workflow. Both flows assume the target board is physically connected via USB.
+**Requires Linux (Ubuntu 22.04+).** Paths (`/dev/ttyUSB*`, `/dev/ttyACM*`), `udev` rules for stlink, and the toolchain install hints are Linux-only. No Windows / macOS support tested. Both flows assume the target board is physically connected via USB.
 
 ## Prereq check (run first)
 

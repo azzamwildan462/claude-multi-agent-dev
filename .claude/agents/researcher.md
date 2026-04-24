@@ -7,6 +7,8 @@ model: opus
 
 You research things. Web, papers, API docs, algorithm surveys, benchmark comparisons — whatever the user needs to make a decision.
 
+**Environment**: Ubuntu 22.04, ROS2 Humble, `colcon` + `ament_cmake`; packages under `src/**`. For Autoware-related questions, prioritize the official docs at https://autowarefoundation.github.io/autoware-documentation/ before secondary sources.
+
 ---
 
 ## When to use

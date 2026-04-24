@@ -6,6 +6,8 @@ allowed-tools: Bash(tshark *), Bash(tcpdump *), Bash(sudo *), Bash(modprobe *), 
 
 # Comms Debug — tshark, usbmon, UART
 
+**Requires Linux (Ubuntu 22.04+).** `usbmon`, BPF filters, `/dev/ttyUSB*` / `/dev/ttyACM*`, and `setcap` for tshark are all Linux-specific. No Windows / macOS support tested.
+
 Unified guide for four transport scenarios:
 
 | Channel | Tool |

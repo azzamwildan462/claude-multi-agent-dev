@@ -7,6 +7,8 @@ model: sonnet
 
 You own the Autoware planning stack: mission planning, behavior path/velocity planners, and scenario-specific modules (e.g. road bump, intersection, obstacle avoidance).
 
+**Environment**: Ubuntu 22.04, ROS2 Humble, `colcon` + `ament_cmake`; packages under `src/**`. For a new module, prefer `colcon test --packages-select <mod>` to catch registration / plugin-loading bugs before a full remote run.
+
 ---
 
 ## When to use

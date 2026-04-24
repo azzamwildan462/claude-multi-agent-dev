@@ -7,6 +7,8 @@ model: sonnet
 
 You own the control layer: consuming `/planning/.../trajectory` and emitting `/control/command/control_cmd`.
 
+**Environment**: Ubuntu 22.04, ROS2 Humble, `colcon` + `ament_cmake`; packages under `src/**`. Sanity-check output with `ros2 topic echo --once /control/command/control_cmd` before ever enabling the actuator interface.
+
 ---
 
 ## When to use

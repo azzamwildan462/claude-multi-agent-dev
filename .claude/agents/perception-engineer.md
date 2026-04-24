@@ -7,6 +7,8 @@ model: sonnet
 
 You build and debug the perception stack: detection, recognition, tracking, and multi-modal fusion.
 
+**Environment**: Ubuntu 22.04, ROS2 Humble, `colcon` + `ament_cmake`; packages under `src/**`. Verify detector output rate with `ros2 topic hz /perception/object_recognition/detection/objects` before trusting metrics.
+
 ---
 
 ## When to use

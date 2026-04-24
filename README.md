@@ -42,6 +42,17 @@ You give it a prompt like *"debug lokalisasi yang drift di tikungan"* and the **
 
 ---
 
+## Prerequisites
+
+- **Ubuntu 22.04** (tested) or Ubuntu 20.04. Linux-only — no Windows / macOS support.
+- **ROS2 Humble Hawksbill**
+- **colcon** + **ament_cmake** (standard ROS2 build tooling)
+- An **Autoware workspace** — or any colcon `src/` containing your AV packages (the agents don't require a specific `src/autoware/*` layout)
+- **Claude Code CLI** — install from https://docs.claude.com/claude-code
+- A **remote build host** (optional) if you want to use the `sync-to-remote` / `build-remote` / `run-remote` skills; otherwise skip those.
+
+---
+
 ## Quickstart
 
 ```bash
