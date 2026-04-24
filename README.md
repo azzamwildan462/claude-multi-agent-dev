@@ -92,11 +92,17 @@ The specialists are instructed to invoke these skills when the user asks to buil
 ## Configuration
 
 - `.env` — only `DASHBOARD_PORT` is strictly required. `REMOTE_HOST` / `REMOTE_USER` are optional placeholders used by remote skills if/when you wire them up.
-- `.mcp.json` — intentionally empty. Add domain MCPs (e.g. a ROS2 MCP) here when they become useful.
+- `.mcp.json` — `mcpServers` is empty by default. An `_examples` block ships as inline documentation for future robot-side MCP integration (see "MCP roadmap" below).
 - `.claude/agents/*.md` — per-specialist system prompts. Edit these to change scope / rules.
 - `CLAUDE.md` — contains the authoritative routing table (read by the main Claude session that acts as Lead). `scripts/check-agents.sh` lints it against the files in `.claude/agents/`.
 - `.claude/hooks/tuning-guard.mjs` — PreToolUse guard that blocks the `tuning-engineer` from editing code files.
 - `.claude/hooks/emit.mjs` — emits every tool call / prompt / handoff to the dashboard.
+
+---
+
+## MCP roadmap
+
+This workspace is ready to connect to a **robot-side MCP server** that exposes diagnostic tools (journalctl, tshark, candump, ROS2 CLI, MCU flash, etc.) as typed MCP tools. When your robot has an MCP server running, register it in `.mcp.json` (templates in the `_examples` block) and Claude will prefer those tools over local SSH + Skill fallbacks. **Skills remain the source of truth for semantics** — the MCP server is one implementation of the same capabilities. See `CLAUDE.md` → MCP tools (robot-side) for the execution-preference pattern and naming convention.
 
 ---
 

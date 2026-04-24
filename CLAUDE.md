@@ -93,6 +93,24 @@ When in doubt, prefer sequential — it's simpler to reason about.
 | `tuning-engineer` | **Param / config ONLY** — cannot edit code. Enforced by `tuning-guard.mjs` hook. |
 | `researcher` | Literature / web / API / algorithm research. Writes reports to `docs/research/`. |
 
+## MCP tools (robot-side)
+
+This workspace is prepped to connect to a robot-side MCP server that exposes diagnostic tools as typed MCP tools (a cleaner alternative to SSH + Bash automation).
+
+**Execution preference when an MCP server is registered:**
+
+1. If an MCP tool covers the task (e.g. `mcp__robot_diag__journalctl`), prefer it over the Skill's local command.
+2. If the MCP server is unreachable (robot down), fall back to the Skill (`linux-debug`, `comms-debug`, `mcu-programming`) run locally or via `ssh`.
+3. Skills remain the **source of truth for semantics** — the MCP server is one implementation of the same capabilities.
+
+**Naming convention (recommended, for readability):**
+Register the robot's server as `robot-diag` (or `robot-diag-<env>` for multi-robot setups). Tools then surface as `mcp__robot_diag__<op>`, e.g. `mcp__robot_diag__journalctl`, `mcp__robot_diag__tshark_capture`, `mcp__robot_diag__ros2_topic_hz`.
+
+**Activation:**
+- `.mcp.json` has empty `mcpServers` + an `_examples` block with stdio-over-SSH and HTTP templates
+- When the server is live: copy one `_examples` entry into `mcpServers` and rename the key
+- First invocation will prompt for permission — consider adding `"mcp__robot_diag__*"` to `allow` in `.claude/settings.json` once stable
+
 ## Dashboard
 
 Every tool call emits events via hooks in `.claude/settings.json`. It shows:

@@ -326,3 +326,7 @@ sudo nsenter -t <pid> -n ss -tulnp     # inspect a container's netns from host
 - **`ss: command not found`** — install `iproute2` (rare, happens in minimal containers)
 - **`strace: ... PTRACE_SEIZE ... Operation not permitted`** — `kernel.yama.ptrace_scope=1`; either `sudo` or temporarily `sysctl kernel.yama.ptrace_scope=0`
 - **apt locks held** — another apt process running, or stale lock in `/var/lib/dpkg/lock-frontend`; check `sudo fuser /var/lib/dpkg/lock-frontend`
+
+---
+
+> If an MCP server exposes equivalent tools (e.g. `mcp__robot_diag__journalctl`), prefer them over the local commands above when the robot is reachable. See `CLAUDE.md` → MCP tools (robot-side).

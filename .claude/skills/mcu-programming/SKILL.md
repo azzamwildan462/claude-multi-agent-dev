@@ -156,3 +156,7 @@ On failure: tell the user exactly which step failed and paste the last 20 lines 
 - **arduino-cli `esptool.py: timed out waiting for packet header`** — hold BOOT button, or try `--upload-speed 115200`
 - **OpenOCD `Error: couldn't bind to socket`** — another gdbserver is already bound; `pkill openocd`
 - **`make` fails with `arm-none-eabi-gcc: command not found`** after install — PATH issue, verify `/usr/bin/arm-none-eabi-gcc` exists
+
+---
+
+> If an MCP server exposes equivalent tools (e.g. `mcp__robot_diag__flash_firmware`, `mcp__robot_diag__arduino_compile`), prefer them over the local commands above when the robot is reachable. See `CLAUDE.md` → MCP tools (robot-side).

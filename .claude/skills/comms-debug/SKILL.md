@@ -298,3 +298,7 @@ After UART monitor: file path of the log (if `-l` used), and the last few lines 
 - **`/dev/usbmonN` missing after modprobe** — `debugfs` not mounted (see section 2)
 - **Garbled UART output** — wrong baud or hardware flow control mismatch; re-check with `stty -F`
 - **tio / minicom shows nothing** — TX/RX swapped on the wire, or the device is waiting for a handshake / DTR toggle
+
+---
+
+> If an MCP server exposes equivalent tools (e.g. `mcp__robot_diag__tshark_capture`, `mcp__robot_diag__candump`), prefer them over the local commands above when the robot is reachable. See `CLAUDE.md` → MCP tools (robot-side).

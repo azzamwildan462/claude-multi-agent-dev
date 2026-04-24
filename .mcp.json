@@ -1,3 +1,15 @@
 {
-  "mcpServers": {}
+  "mcpServers": {},
+  "_examples": {
+    "__comment": "Templates for future robot-side MCP server integration. mcpServers is the only field Claude Code reads; everything under _examples is inert documentation. When your server is ready, copy an entry into mcpServers and rename the key (e.g. 'robot-diag'). See CLAUDE.md > MCP tools (robot-side) for the full pattern.",
+    "robot-diag-stdio": {
+      "__comment": "stdio over SSH — no port exposure, uses your existing SSH auth.",
+      "command": "ssh",
+      "args": ["ubuntu@<robot-host>", "/opt/robot-mcp/bin/mcp-server", "--stdio"]
+    },
+    "robot-diag-http": {
+      "__comment": "HTTP transport — faster than stdio-over-SSH; requires port + auth scheme.",
+      "url": "http://<robot-host>:8765/mcp"
+    }
+  }
 }
