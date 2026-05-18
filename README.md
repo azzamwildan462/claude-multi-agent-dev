@@ -1,6 +1,6 @@
 # claude-multi-agent-dev (general branch)
 
-Claude Code multi-agent workspace untuk **kebutuhan akademik umum — dosen dan mahasiswa**: menulis paper, bikin slide, ngoding Python, analisis data, dan riset literatur.
+Claude Code multi-agent workspace untuk menulis paper, bikin slide, ngoding Python, analisis data, dan riset literatur.
 
 Cukup ketik perintah seperti *"perbaiki paragraf abstrak ini"* atau *"buatkan slide Beamer 15 menit dari paper saya"*, dan **main Claude session (Lead Engineer)** akan meneruskannya ke spesialis yang tepat — writer, slide-engineer, data-engineer, latex-engineer, dst. Koordinasi **ad-hoc** (tanpa GitHub issues / PRs / branch per task); main session mendelegasikan langsung lewat `Task` tool.
 
@@ -122,19 +122,7 @@ Lead pecah permintaan ini jadi rantai 5 langkah:
 
 Hasil akhir: folder dengan `pythagoras_app.py` yang bisa dijalankan + `paper/paper.pdf` 6 halaman IEEE + `docs/research/pythagoras.md` sebagai referensi.
 
-### Skenario 2 — Dataset survei skripsi
-
-```
-> aku punya data.csv hasil survei skripsi tentang kepuasan mahasiswa terhadap PJJ,
-  analisis lengkap dan tulis bab 4 skripsi-nya
-```
-
-1. **`data-engineer`** → load `data.csv`, eksplorasi (missing values, distribusi), uji statistik (chi-square / korelasi / regresi sesuai tipe variabel), bikin plot. Output: notebook `analysis.ipynb` + summary `docs/research/survei-pjj.md`.
-2. **`math-engineer`** (kalau perlu) → formulasikan rumus statistik yang dipakai (effect size, CI) dalam LaTeX.
-3. **`writer-editor`** → tulis bab 4 (Hasil dan Pembahasan) berdasarkan output notebook + summary. Bahasa formal akademik.
-4. **`latex-engineer`** → bungkus ke template skripsi kampus, sisipkan plot dari notebook, build PDF.
-
-### Skenario 3 — Slide kuliah dari paper
+### Skenario 2 — Slide kuliah dari paper
 
 ```
 > bikin slide kuliah 50 menit tentang transformer, basisnya dari paper "Attention is All You Need"
@@ -143,7 +131,7 @@ Hasil akhir: folder dengan `pythagoras_app.py` yang bisa dijalankan + `paper/pap
 1. **`researcher`** → baca PDF paper, tulis ringkasan terstruktur ke `docs/research/transformer.md` (motivasi, arsitektur, hasil, kritik).
 2. **`slide-engineer`** → baca ringkasan, buat deck Beamer atau Marp dengan ±25 slide (asumsi ~2 menit/slide), lengkap dengan speaker notes per slide. Struktur: hook → masalah RNN/LSTM → self-attention → arsitektur encoder-decoder → eksperimen → diskusi.
 
-### Skenario 4 — Bikin tool kecil dengan referensi
+### Skenario 3 — Bikin tool kecil dengan referensi
 
 ```
 > bandingkan library OCR Python untuk dokumen Bahasa Indonesia, lalu bikin CLI tool yang OCR-in file PDF
@@ -152,7 +140,7 @@ Hasil akhir: folder dengan `pythagoras_app.py` yang bisa dijalankan + `paper/pap
 1. **`researcher`** → bandingkan Tesseract, EasyOCR, PaddleOCR di dokumen Bahasa Indonesia. Output `docs/research/ocr-bahasa.md` + rekomendasi.
 2. **`python-engineer`** → implementasi CLI tool (`argparse` / `typer`) pakai library yang direkomendasikan, baca PDF → keluarkan teks. Test dengan sample PDF.
 
-### Skenario 5 — Permintaan paralel disjoint
+### Skenario 4 — Permintaan paralel disjoint
 
 ```
 > sambil riset library scraping Python yang terbaik, edit paragraf abstrak paper saya di abstract.md
@@ -163,7 +151,7 @@ Karena dua permintaan independen, Lead nge-Task **paralel** (satu pesan, dua too
 - **`researcher`** → tulis perbandingan ke `docs/research/python-scraping.md`.
 - **`writer-editor`** → edit `abstract.md` langsung dengan before → after.
 
-### Skenario 6 — Satu spesialis aja
+### Skenario 5 — Satu spesialis aja
 
 Buat permintaan fokus, Lead langsung route ke satu spesialis:
 
