@@ -94,61 +94,86 @@ bash scripts/start-dashboard.sh
 claude
 
 # 3. Kick off dengan /start
-/start tolong buatkan slide Beamer 15 menit untuk seminar tentang topik X
+/start coba riset tentang pythagoras, buatkan aku aplikasi tkinter tentang pythagoras, buatkan aku paper tentang pythagoras 6 halaman standard IEEE
 ```
 
-Main Claude session (sebagai Lead) baca permintaanmu, pilih spesialis yang tepat, dan delegasi. Kamu lihat semua aktivitasnya di dashboard: agent aktif, log aktivitas, delegasi terakhir.
+Main Claude session (sebagai Lead) baca permintaanmu, pecah jadi langkah-langkah, lalu delegasi ke spesialis — paralel kalau bisa, sekuensial kalau ada dependency. Semua kelihatan di dashboard.
 
 ---
 
 ## Contoh penggunaan
 
-### 1. Satu spesialis — permintaan langsung
+Multi-agent paling berguna pas satu permintaan butuh **banyak spesialis berurutan**. Berikut beberapa skenario lengkap.
+
+### Skenario 1 — Pythagoras: riset + aplikasi + paper IEEE
 
 ```
-> tolong buatkan script Python untuk rename file batch berdasarkan regex
+> coba riset tentang pythagoras, buatkan aku aplikasi tkinter tentang pythagoras,
+  buatkan aku paper tentang pythagoras 6 halaman standard IEEE
 ```
-→ Lead route ke `python-engineer`, dia tulis script dan jalanin sample run.
+
+Lead pecah permintaan ini jadi rantai 5 langkah:
+
+1. **`researcher`** → kumpulkan materi (sejarah, pembuktian, aplikasi modern), tulis ke `docs/research/pythagoras.md` dengan sitasi.
+2. **`math-engineer`** (paralel dengan #3) → derive beberapa bukti teorema (geometris + aljabar), verifikasi dengan sympy, output LaTeX math snippet.
+3. **`python-engineer`** (paralel dengan #2) → bikin aplikasi Tkinter: input dua sisi → output hipotenusa + visualisasi segitiga. Jalanin sample run buat memastikan jalan.
+4. **`writer-editor`** → tulis prosa paper IEEE 6 halaman (abstract, intro, related work, method, demo aplikasi, conclusion) berdasarkan output riset + math.
+5. **`latex-engineer`** → ambil template IEEE (`IEEEtran.cls`), bungkus prosa + math + screenshot aplikasi, build PDF dengan `latexmk`. Fix compile error kalau ada.
+
+Hasil akhir: folder dengan `pythagoras_app.py` yang bisa dijalankan + `paper/paper.pdf` 6 halaman IEEE + `docs/research/pythagoras.md` sebagai referensi.
+
+### Skenario 2 — Dataset survei skripsi
 
 ```
-> perbaiki paragraf intro paper saya di intro.md, biar lebih flow
+> aku punya data.csv hasil survei skripsi tentang kepuasan mahasiswa terhadap PJJ,
+  analisis lengkap dan tulis bab 4 skripsi-nya
 ```
-→ Lead route ke `writer-editor`, dia edit langsung dengan menampilkan before → after.
+
+1. **`data-engineer`** → load `data.csv`, eksplorasi (missing values, distribusi), uji statistik (chi-square / korelasi / regresi sesuai tipe variabel), bikin plot. Output: notebook `analysis.ipynb` + summary `docs/research/survei-pjj.md`.
+2. **`math-engineer`** (kalau perlu) → formulasikan rumus statistik yang dipakai (effect size, CI) dalam LaTeX.
+3. **`writer-editor`** → tulis bab 4 (Hasil dan Pembahasan) berdasarkan output notebook + summary. Bahasa formal akademik.
+4. **`latex-engineer`** → bungkus ke template skripsi kampus, sisipkan plot dari notebook, build PDF.
+
+### Skenario 3 — Slide kuliah dari paper
 
 ```
-> analisis dataset survei.csv: cari korelasi antara kepuasan dan IPK
+> bikin slide kuliah 50 menit tentang transformer, basisnya dari paper "Attention is All You Need"
 ```
-→ Lead route ke `data-engineer`, dia buat notebook dengan eksplorasi + uji statistik + plot.
 
-### 2. Paralel — permintaan disjoint
+1. **`researcher`** → baca PDF paper, tulis ringkasan terstruktur ke `docs/research/transformer.md` (motivasi, arsitektur, hasil, kritik).
+2. **`slide-engineer`** → baca ringkasan, buat deck Beamer atau Marp dengan ±25 slide (asumsi ~2 menit/slide), lengkap dengan speaker notes per slide. Struktur: hook → masalah RNN/LSTM → self-attention → arsitektur encoder-decoder → eksperimen → diskusi.
 
-```
-> sambil riset library scraping Python, perbaiki paragraf abstrak saya
-```
-→ Lead nge-Task `researcher` + `writer-editor` **secara paralel** (di satu pesan dengan dua tool call).
-
-### 3. Sekuensial — output spesialis A jadi input B
+### Skenario 4 — Bikin tool kecil dengan referensi
 
 ```
-> bikin slide 15 menit dari paper transformer di docs/paper-transformer.pdf
+> bandingkan library OCR Python untuk dokumen Bahasa Indonesia, lalu bikin CLI tool yang OCR-in file PDF
 ```
-→ Step 1: `researcher` ringkas paper ke `docs/research/transformer-summary.md`.
-→ Step 2: `slide-engineer` baca ringkasan itu, buat deck Beamer / Marp dengan speaker notes.
+
+1. **`researcher`** → bandingkan Tesseract, EasyOCR, PaddleOCR di dokumen Bahasa Indonesia. Output `docs/research/ocr-bahasa.md` + rekomendasi.
+2. **`python-engineer`** → implementasi CLI tool (`argparse` / `typer`) pakai library yang direkomendasikan, baca PDF → keluarkan teks. Test dengan sample PDF.
+
+### Skenario 5 — Permintaan paralel disjoint
 
 ```
-> tulis bagian metodologi paper yang berisi turunan gradient loss function
+> sambil riset library scraping Python yang terbaik, edit paragraf abstrak paper saya di abstract.md
 ```
-→ Step 1: `math-engineer` derive gradient, verifikasi dengan sympy, output LaTeX math snippet.
-→ Step 2: `writer-editor` tulis prosa metodologi yang menjelaskan rumus tsb.
-→ Step 3: `latex-engineer` bungkus prosa + math ke `.tex` di template paper.
 
-### 4. Riset → ngoding
+Karena dua permintaan independen, Lead nge-Task **paralel** (satu pesan, dua tool call):
 
-```
-> bandingkan library OCR Python yang akurat untuk dokumen Bahasa Indonesia, lalu implementasikan yang terbaik
-```
-→ Step 1: `researcher` buat `docs/research/ocr-bahasa.md` dengan perbandingan + rekomendasi.
-→ Step 2: `python-engineer` implementasikan pipeline OCR pakai library yang direkomendasikan.
+- **`researcher`** → tulis perbandingan ke `docs/research/python-scraping.md`.
+- **`writer-editor`** → edit `abstract.md` langsung dengan before → after.
+
+### Skenario 6 — Satu spesialis aja
+
+Buat permintaan fokus, Lead langsung route ke satu spesialis:
+
+| Permintaan | Spesialis yang dipanggil |
+|---|---|
+| `tulis script Python rename file batch pakai regex` | `python-engineer` |
+| `perbaiki grammar paragraf ini` | `writer-editor` |
+| `turunkan gradient dari fungsi loss MSE` | `math-engineer` |
+| `bikin Makefile untuk project C kecil` | `coder` |
+| `compile error: ! Package biblatex Error: ...` | `latex-engineer` |
 
 ---
 
