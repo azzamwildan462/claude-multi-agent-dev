@@ -3,11 +3,11 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Claude Multi-Agent · AV Orchestration</title>
+    <title>Claude Multi-Agent · General Workspace</title>
     <style>
       /* =====================================================================
-         Claude Multi-Agent Dev — AV branch · single-file dashboard
-         Dark theme · 11-node agent graph · activity log · delegation panel
+         Claude Multi-Agent Dev — general branch · single-file dashboard
+         Dark theme · 9-node agent graph · activity log · delegation panel
          ---------------------------------------------------------------------
          The center node ("Lead") represents the MAIN Claude session, not a
          subagent. Main-session tool calls emit with agent="lead-engineer"
@@ -331,7 +331,7 @@
       <header class="topbar">
         <div class="topbar-left">
           <div id="connDot" class="conn-dot" title="disconnected"></div>
-          <span class="brand">claude · multi-agent · AV</span>
+          <span class="brand">claude · multi-agent · general</span>
         </div>
         <div class="topbar-right">
           <span><strong id="eventCount">0</strong> events</span>
@@ -366,18 +366,16 @@
       // string when a tool call has no subagent_type (i.e., it came from main).
       const LEAD = { id: "lead-engineer", role: "Lead (main)", name: "Lead Engineer", x: 450, y: 340, color: "#f5b13d" };
 
-      // 10 specialists evenly around lead at radius ~250, starting at top, clockwise.
+      // 8 specialists evenly around lead at radius ~250, starting at top, clockwise.
       const SPECIALISTS = [
-        { id: "hardware-engineer",     role: "Hardware",     name: "Hardware",     x: 450, y:  90, color: "#9ca3af" },
-        { id: "sensing-engineer",      role: "Sensing",      name: "Sensing",      x: 597, y: 138, color: "#cbd5e1" },
-        { id: "localization-engineer", role: "Localization", name: "Localization", x: 688, y: 263, color: "#60a5fa" },
-        { id: "mapping-engineer",      role: "Mapping",      name: "Mapping",      x: 688, y: 417, color: "#3b82f6" },
-        { id: "perception-engineer",   role: "Perception",   name: "Perception",   x: 597, y: 542, color: "#a78bfa" },
-        { id: "planning-engineer",     role: "Planning",     name: "Planning",     x: 450, y: 590, color: "#34d399" },
-        { id: "control-engineer",      role: "Control",      name: "Control",      x: 303, y: 542, color: "#22c55e" },
-        { id: "system-evaluator",      role: "System",       name: "System Eval",  x: 212, y: 417, color: "#f59e0b" },
-        { id: "tuning-engineer",       role: "Tuning",       name: "Tuning",       x: 212, y: 263, color: "#2dd4bf" },
-        { id: "researcher",            role: "Research",     name: "Researcher",   x: 303, y: 138, color: "#f472b6" },
+        { id: "researcher",      role: "Research",   name: "Researcher",  x: 450, y:  90, color: "#f472b6" },
+        { id: "latex-engineer",  role: "LaTeX",      name: "LaTeX",       x: 627, y: 163, color: "#60a5fa" },
+        { id: "python-engineer", role: "Python",     name: "Python",      x: 700, y: 340, color: "#34d399" },
+        { id: "data-engineer",   role: "Data",       name: "Data",        x: 627, y: 517, color: "#22c55e" },
+        { id: "coder",           role: "Coder",      name: "Coder",       x: 450, y: 590, color: "#f59e0b" },
+        { id: "writer-editor",   role: "Writer",     name: "Writer",      x: 273, y: 517, color: "#a78bfa" },
+        { id: "slide-engineer",  role: "Slides",     name: "Slides",      x: 200, y: 340, color: "#2dd4bf" },
+        { id: "math-engineer",   role: "Math",       name: "Math",        x: 273, y: 163, color: "#cbd5e1" },
       ];
       const AGENTS = [LEAD, ...SPECIALISTS];
 

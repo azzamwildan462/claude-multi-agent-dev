@@ -21,15 +21,6 @@
             "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/emit.mjs\" tool_start"
           }
         ]
-      },
-      {
-        "matcher": "Edit|Write",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/tuning-guard.mjs\""
-          }
-        ]
       }
     ],
     "PostToolUse": [
