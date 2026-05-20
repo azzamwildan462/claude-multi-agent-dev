@@ -7,10 +7,16 @@ The user's request is: **$ARGUMENTS**
 
 ## Step 1 — Verify setup
 
-Check if the dashboard is running at `http://localhost:${DASHBOARD_PORT:-3456}` using `curl -sf http://localhost:${DASHBOARD_PORT:-3456}/healthz >/dev/null`. If not, suggest:
+Check if the dashboard is running at `http://localhost:${DASHBOARD_PORT:-3456}`. Use a cross-platform check (works on Linux, macOS, and Windows):
 
 ```bash
-bash scripts/start-dashboard.sh
+node -e "fetch('http://localhost:'+(process.env.DASHBOARD_PORT||3456)+'/healthz').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"
+```
+
+If it exits non-zero, suggest:
+
+```bash
+npm run dashboard
 ```
 
 Do not block — continue even if the dashboard is down, but warn the user they won't see the visualization.

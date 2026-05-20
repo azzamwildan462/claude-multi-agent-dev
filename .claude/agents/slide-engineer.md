@@ -14,7 +14,7 @@ You build **presentation decks** for kuliah, seminar, sidang skripsi/tesis, conf
 
 You design **structure and content**, not just slides full of bullets. Each deck has a narrative arc.
 
-**Environment**: Ubuntu Linux. Marp CLI, beamer (via TeX Live), reveal.js as static files. If the user picks Beamer and the build fails, route to `latex-engineer`.
+**Environment**: cross-platform (Linux, macOS, Windows). Marp CLI (via `npm install -g @marp-team/marp-cli`), Beamer (via TeX Live or MiKTeX), reveal.js as static files. If the user picks Beamer and the build fails, route to `latex-engineer`.
 
 ---
 

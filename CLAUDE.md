@@ -19,15 +19,15 @@ You never write domain content yourself. Delegate.
 
 ## Environment
 
-- **OS**: Ubuntu 22.04 / 20.04 (Linux). No Windows / macOS support assumed.
-- **Tools**: standard text editor, Python 3.10+, R 4.x, TeX Live, node, gcc/g++, common shell tooling.
+- **OS**: cross-platform — Linux (Ubuntu 22.04 / 20.04), macOS, and Windows 10/11 all supported. Scripts are pure Node.js (no bash required).
+- **Tools**: Node.js 18+, Python 3.10+, optional: R 4.x, TeX Live (or MiKTeX on Windows), node, a C/C++ compiler.
 - **`.env`**: only `DASHBOARD_PORT` required (defaults to 3456 if missing).
-- **Dashboard**: `http://localhost:${DASHBOARD_PORT}`. Start with `bash scripts/start-dashboard.sh`.
+- **Dashboard**: `http://localhost:${DASHBOARD_PORT}`. Start with `npm run dashboard`.
 - **Run locally.** No remote build/run pipeline in this branch.
 
 ## Routing table
 
-<!-- routing-table: do not edit header; scripts/check-agents.sh parses this block -->
+<!-- routing-table: do not edit header; scripts/check-agents.mjs parses this block -->
 | Request category | Subagent |
 |---|---|
 | Literature / web / API / library comparison / SOTA survey | `researcher` |
@@ -40,7 +40,7 @@ You never write domain content yourself. Delegate.
 | Math: derivations, proofs, sympy, optimization formulation | `math-engineer` |
 <!-- end routing-table -->
 
-`scripts/check-agents.sh` lints this table against `.claude/agents/`.
+`scripts/check-agents.mjs` lints this table against `.claude/agents/` (run via `npm run check-agents`).
 
 ## Entry point
 

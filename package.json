@@ -2,19 +2,19 @@
   "name": "claude-multi-agent-dev",
   "version": "0.1.0",
   "private": true,
-  "description": "Claude Code multi-agent workspace for Autonomous Vehicle development based on Autoware — Lead plus 10 specialist agents (hardware, sensing, localization, mapping, perception, planning, control, system-evaluator, tuning, researcher) with a live orchestration dashboard.",
+  "description": "Claude Code multi-agent workspace for general academic and software work — Lead plus 8 specialist agents (researcher, latex, python, data, coder, writer-editor, slides, math) with a live orchestration dashboard.",
   "scripts": {
-    "setup": "bash scripts/setup.sh",
-    "dashboard": "bash scripts/start-dashboard.sh",
-    "dashboard:stop": "bash -c 'if [ -f dashboard/.dashboard.pid ]; then kill $(cat dashboard/.dashboard.pid) 2>/dev/null; rm dashboard/.dashboard.pid; echo stopped; else echo not running; fi'"
+    "setup": "node scripts/setup.mjs",
+    "check-agents": "node scripts/check-agents.mjs",
+    "dashboard": "node scripts/start-dashboard.mjs",
+    "dashboard:stop": "node scripts/start-dashboard.mjs stop"
   },
   "keywords": [
     "claude-code",
     "multi-agent",
     "orchestration",
-    "autonomous-vehicle",
-    "autoware",
-    "ros2"
+    "academic",
+    "research"
   ],
   "license": "MIT",
   "engines": {
