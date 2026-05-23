@@ -41,50 +41,53 @@ Just type a request like *"polish my abstract paragraph"* or *"build a 15-minute
 
 ## Supported platforms
 
-Cross-platform — scripts are pure Node.js, no bash required:
-
 - **Linux** (Ubuntu 22.04 / 20.04 tested)
 - **macOS** (Intel + Apple Silicon)
 - **Windows 10 / 11** (PowerShell 5.1+ or PowerShell 7)
 
 ---
 
-## Prerequisites
+## The minimal stack
 
-Required on every platform:
+**Multi-agent routing is a Claude Code feature, not a service we run.** The Lead delegates via the built-in `Task` tool — no extra processes required.
 
-- **Node.js 18+** — for the dashboard, hooks, and helper scripts
-- **Claude Code CLI** — install from https://docs.claude.com/claude-code
-- **Python 3.10+** — for `python-engineer`, `data-engineer`, `math-engineer`
-- **Git** — for cloning and version control
+What's truly required to use this workspace:
 
-Optional, depending on which specialists you use:
+- **Claude Code CLI** — https://docs.claude.com/claude-code (this is the only hard dependency)
+- **Git** — to clone the repo
 
-- **TeX Live** (Linux/macOS) or **MiKTeX** (Windows) — for `latex-engineer` and Beamer slides
-- **R 4.x** — for `data-engineer` if you prefer R over Python
-- **Marp CLI** — for `slide-engineer` if you want Marp decks: `npm install -g @marp-team/marp-cli`
-- **A C/C++ compiler** — gcc/g++ (Linux), clang (macOS), MSVC or MinGW (Windows) for `coder`
+That's it. Once Claude Code is installed and you've cloned the repo, `claude → /start <request>` already works.
 
-### Installing prerequisites
+Everything else is **per-specialist tooling** — only needed if that specialist actually runs:
+
+| Specialist | What you need installed |
+|---|---|
+| `python-engineer`, `data-engineer`, `math-engineer` | Python 3.10+ |
+| `latex-engineer`, Beamer in `slide-engineer` | TeX Live (Linux/macOS) or MiKTeX (Windows) |
+| `data-engineer` if you want R | R 4.x |
+| `slide-engineer` for Marp decks | Marp CLI (`npm i -g @marp-team/marp-cli`) |
+| `coder` for C/C++ | gcc/g++ (Linux), clang (macOS), MSVC/MinGW (Windows) |
+
+Install tooling only when you hit a specialist that needs it; missing tools will surface clearly.
+
+### Installing per-platform tooling (examples)
 
 **Linux (Ubuntu/Debian):**
 ```bash
-sudo apt update
-sudo apt install nodejs npm python3 python3-pip git
+sudo apt install python3 python3-pip git
 sudo apt install texlive-latex-extra texlive-bibtex-extra latexmk   # optional
 sudo apt install r-base                                              # optional
 ```
 
 **macOS (Homebrew):**
 ```bash
-brew install node python git
+brew install python git
 brew install --cask mactex                                           # optional
 brew install r                                                       # optional
 ```
 
 **Windows (winget):**
 ```powershell
-winget install OpenJS.NodeJS
 winget install Python.Python.3.12
 winget install Git.Git
 winget install MiKTeX.MiKTeX                                         # optional
@@ -93,40 +96,13 @@ winget install RProject.R                                            # optional
 
 ---
 
-## Installation
+## Quickstart — minimal path (no dashboard)
 
 ```bash
 # 1. Clone & switch to the general branch
 git clone <repo-url> claude-multi-agent-dev
 cd claude-multi-agent-dev
 git checkout general
-
-# 2. One-command setup (cross-platform — Node.js, no bash needed)
-npm run setup
-
-# This script:
-#   - checks Node.js, git versions
-#   - copies .env.example → .env if missing
-#   - runs npm install in dashboard/
-#   - lints the routing table against .claude/agents/
-```
-
-If you'd rather run things step-by-step:
-```bash
-cp .env.example .env                  # (Windows: copy .env.example .env)
-cd dashboard && npm install && cd ..
-npm run check-agents
-```
-
----
-
-## Quickstart
-
-```bash
-# 1. Start the dashboard (optional but recommended)
-npm run dashboard
-# → http://localhost:3456
-# Stop: npm run dashboard:stop
 
 # 2. Open Claude Code in this directory
 claude
@@ -136,7 +112,38 @@ claude
        and write a 6-page IEEE-formatted paper about it
 ```
 
-The main Claude session (acting as Lead) parses your request, breaks it into steps, and delegates — in parallel when possible, sequentially when there's a dependency. You see everything in the dashboard.
+That's it. The Lead routes your request through specialists via the `Task` tool. You'll see progress in the terminal as each subagent runs.
+
+---
+
+## Optional: live dashboard
+
+The repo ships with a small Node.js dashboard that visualizes the 9-node agent graph (Lead + 8 specialists), activity log, and delegation tree. **Purely observability** — multi-agent works the same whether or not it's running.
+
+### Installing the dashboard
+
+Requires **Node.js 18+** (which is usually present already because Claude Code itself runs on Node).
+
+```bash
+# One-shot setup: copies .env.example → .env, installs dashboard deps, lints routing table
+npm run setup
+
+# Start the dashboard
+npm run dashboard
+# → http://localhost:3456
+# Stop: npm run dashboard:stop
+```
+
+If you'd rather do it manually:
+```bash
+cp .env.example .env                  # (Windows: copy .env.example .env)
+cd dashboard && npm install && cd ..
+npm run dashboard
+```
+
+### Skipping the dashboard
+
+If `dashboard/node_modules` isn't installed, the SessionStart hook detects this and exits silently — it won't slow you down or error out. The event-emitter hook (`emit.mjs`) likewise no-ops when the dashboard isn't reachable. So you can ignore the whole thing and just use `claude → /start ...`.
 
 ---
 
@@ -219,52 +226,43 @@ For focused requests, Lead routes straight to one specialist:
 | Slides: Beamer, Marp, reveal.js, PowerPoint outline | `slide-engineer` |
 | Math: derivations, proofs, sympy, optimization formulation | `math-engineer` |
 
-The authoritative routing table lives in `CLAUDE.md`. `npm run check-agents` lints it automatically if any agent file is missing.
+The authoritative routing table lives in `CLAUDE.md`. If you have Node.js, `npm run check-agents` lints it; otherwise you can just verify manually that every name in the table has a matching `.claude/agents/<name>.md`.
 
 ---
 
 ## Configuration
 
+Core files (used by Claude Code at runtime — no other process needed):
+
 | File | Purpose |
 |---|---|
-| `.env` | Only `DASHBOARD_PORT` is required (defaults to 3456). |
-| `.mcp.json` | Empty by default. The `_examples` block is a template for adding external MCP servers. |
 | `.claude/agents/*.md` | Per-specialist system prompts. Edit to change scope / rules. |
-| `CLAUDE.md` | The routing table read by the Lead. The HTML sentinel comments `<!-- routing-table: -->` ... `<!-- end routing-table -->` must stay — `scripts/check-agents.mjs` parses that block. |
-| `.claude/hooks/emit.mjs` | Emits every tool call / prompt / handoff to the dashboard. |
-| `.claude/hooks/ensure-dashboard.mjs` | Auto-spawns the dashboard at session start if it's not already up. |
+| `CLAUDE.md` | The routing table read by the Lead. The HTML sentinel comments `<!-- routing-table: -->` ... `<!-- end routing-table -->` must stay — they mark the block linted by `scripts/check-agents.mjs`. |
+| `.claude/commands/start.md` | The `/start` slash command. |
 | `.claude/skills/os-debug/` | Cross-platform OS-level debugging skill (journalctl/apt on Linux, PowerShell/winget on Windows). |
+| `.mcp.json` | Empty by default. The `_examples` block is a template for adding external MCP servers. |
+
+Optional (only relevant if you run the dashboard):
+
+| File | Purpose |
+|---|---|
+| `.env` | `DASHBOARD_PORT` (defaults to 3456 if missing or absent). |
+| `.claude/hooks/emit.mjs` | Posts every tool call / prompt / handoff to the dashboard. No-ops silently if the dashboard isn't running. |
+| `.claude/hooks/ensure-dashboard.mjs` | Auto-spawns the dashboard at session start if `dashboard/node_modules` is installed. No-ops silently otherwise. |
+| `dashboard/` | Node.js dashboard server + UI. |
 
 ---
 
-## Dashboard
+## Optional npm scripts
 
-Open in a browser:
-
-```
-http://localhost:${DASHBOARD_PORT:-3456}
-```
-
-It shows:
-
-- **9-node agent graph** — Lead in the center, 8 specialists around it. The active node lights up.
-- **Activity log** — last ~60 events (tool calls, prompts, handoffs).
-- **Delegations panel** — most recent `Task` handoffs.
-
-Main-session events are tagged `lead-engineer` on the dashboard (`emit.mjs` default when no subagent context exists), so your routing decisions light up the Lead node.
-
----
-
-## npm scripts
+Only useful if you opted into the dashboard. All scripts are pure Node.js — same syntax on Linux, macOS, and Windows.
 
 | Command | What it does |
 |---|---|
-| `npm run setup` | One-shot setup — checks prereqs, copies `.env`, installs dashboard deps, lints routing |
+| `npm run setup` | One-shot setup — copies `.env`, installs dashboard deps, lints routing table |
 | `npm run dashboard` | Starts the dashboard (detached, logs to `dashboard/dashboard.log`) |
 | `npm run dashboard:stop` | Stops the dashboard if it was started via the script |
 | `npm run check-agents` | Lints the routing table in `CLAUDE.md` against `.claude/agents/` |
-
-All scripts are pure Node.js — no bash, no PowerShell-specific syntax. Run them identically on Linux, macOS, and Windows.
 
 ---
 
@@ -276,7 +274,7 @@ This workspace is ready to connect to **external MCP servers** (e.g. Notion, Goo
 
 ## Customization
 
-- **Add a new specialist**: create `.claude/agents/<name>.md` using the same frontmatter style as `researcher.md`, then add a row to the routing table in `CLAUDE.md` (inside the sentinel comments). To make it appear in the dashboard graph, update the `SPECIALISTS` array in `dashboard/public/index.html` (around line 370).
+- **Add a new specialist**: create `.claude/agents/<name>.md` using the same frontmatter style as `researcher.md`, then add a row to the routing table in `CLAUDE.md` (inside the sentinel comments). That's enough for the Lead to route to it. If you also use the dashboard, update the `SPECIALISTS` array in `dashboard/public/index.html` (around line 370) so the new node appears in the graph.
 - **Edit a specialist's scope**: modify the corresponding `.claude/agents/<name>.md`. The "Hard rules" and "Output convention" sections matter most.
 - **Discussion mode (read-only)**: use the `/diskusi` skill when you want to brainstorm without making any changes.
 
